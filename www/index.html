@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no, interactive-widget=resizes-content">
+<meta name="theme-color" content="#0b1218">
+<title>Jeux de Papa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@400;500;600;700;800&family=Chakra+Petch:ital,wght@0,400;0,500;0,600;0,700;1,400&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<canvas id="backdrop" aria-hidden="true"></canvas>
+
+<main id="app">
+  <!-- Création du pseudo -->
+  <section id="s-pseudo" class="screen">
+    <div class="brand">
+      <h1 class="logo"><span class="logo-small">Les jeux de</span>Papa</h1>
+      <p class="tag">Cent niveaux, dix jeux et cent objets à collectionner.</p>
+    </div>
+    <div class="panel">
+      <label for="pseudo-in">Choisis ton pseudo</label>
+      <div class="row">
+        <input id="pseudo-in" maxlength="16" autocomplete="off" autocapitalize="words" spellcheck="false" placeholder="Ex. Papa" enterkeyhint="done">
+        <button class="btn primary small" id="pseudo-ok">Entrer</button>
+      </div>
+      <p class="err" id="pseudo-err" role="alert"></p>
+    </div>
+  </section>
+
+  <!-- Menu -->
+  <section id="s-menu" class="screen">
+    <div class="brand">
+      <h1 class="logo"><span class="logo-small">Les jeux de</span>Papa</h1>
+      <p class="hello" id="hello"></p>
+      <p class="progress" id="m-progress"></p>
+    </div>
+    <div class="menu-actions">
+      <button class="btn primary big" id="m-play"><span>Jouer</span><small id="m-play-sub">Niveau 1</small></button>
+      <button class="btn" id="m-levels">Tous les niveaux</button>
+      <button class="btn" id="m-dex">Sac de papa</button>
+      <button class="btn" id="m-settings">Réglages</button>
+    </div>
+  </section>
+
+  <!-- Sélection des niveaux -->
+  <section id="s-levels" class="screen">
+    <header class="bar">
+      <button class="icon" data-back aria-label="Retour"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h2>Niveaux</h2>
+      <span class="bar-stars" id="lv-stars"></span>
+    </header>
+    <div class="levels" id="levels"></div>
+  </section>
+
+  <!-- Réglages -->
+  <section id="s-settings" class="screen">
+    <header class="bar">
+      <button class="icon" data-back aria-label="Retour"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h2>Réglages</h2>
+      <span></span>
+    </header>
+    <div class="settings">
+      <div class="field">
+        <label for="set-pseudo">Pseudo</label>
+        <div class="row"><input id="set-pseudo" maxlength="16" autocomplete="off" spellcheck="false" enterkeyhint="done"><button class="btn small" id="set-pseudo-ok">Enregistrer</button></div>
+        <p class="err" id="set-err" role="alert"></p>
+      </div>
+      <div class="field">
+        <label for="set-music">Musique</label>
+        <input type="range" id="set-music" min="0" max="100">
+      </div>
+      <div class="field">
+        <label for="set-sfx">Effets sonores</label>
+        <input type="range" id="set-sfx" min="0" max="100">
+      </div>
+      <div class="field danger">
+        <p>Effacer la progression remet tous les niveaux à zéro. Ton pseudo est conservé.</p>
+        <button class="btn ghost" id="set-reset">Effacer la progression</button>
+      </div>
+      <div class="field danger" id="wipe-field" hidden>
+        <p><b>Zone secrète !</b> Tout remettre à zéro : niveaux, pseudo, Sac de papa, raretés des objets, succès et défis du jour. Le jeu repart comme au tout premier jour.</p>
+        <button class="btn ghost" id="set-wipe">Réinitialiser tout le jeu</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Jeu -->
+  <section id="s-game" class="screen">
+    <header class="gbar">
+      <button class="icon" id="g-pause" aria-label="Pause"><svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg></button>
+      <div class="gtitle"><strong id="g-level">Niveau 1</strong><span id="g-theme"></span></div>
+      <div class="gtools">
+        <button class="tool" id="g-rules" aria-label="Règles du jeu"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.6 2.3c-.8.4-1.2 1-1.2 1.9M12 16.8v.2"/></svg></button>
+        <button class="tool hint" id="g-hint" aria-label="Indice">
+          <svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>
+          <span id="g-hints">3</span>
+        </button>
+        <button class="tool" id="g-zout" aria-label="Dézoomer"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21M7.5 10.5h6"/></svg></button>
+        <button class="tool" id="g-zin" aria-label="Zoomer"><svg viewBox="0 0 24 24"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21M7.5 10.5h6M10.5 7.5v6"/></svg></button>
+        <button class="tool" id="g-fit" aria-label="Voir toute la scène"><svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg></button>
+      </div>
+      <div class="gstats"><span id="g-count">0/20</span><span id="g-time">0:00</span></div>
+    </header>
+    <div class="stage" id="stage">
+      <canvas id="cv"></canvas>
+      <div class="toast" id="g-tip"></div>
+      <div class="loading" id="loading"><span class="spinner"></span>Préparation de la scène</div>
+    </div>
+    <ul class="words" id="words" aria-label="Objets à trouver"></ul>
+  </section>
+
+  <!-- Mini-jeux -->
+  <section id="s-mini" class="screen">
+    <header class="gbar">
+      <button class="icon" id="x-pause" aria-label="Pause"><svg viewBox="0 0 24 24"><path d="M9 5v14M15 5v14"/></svg></button>
+      <div class="gtitle"><strong id="x-level">Niveau 1</strong><span id="x-name"></span></div>
+      <div class="gtools"><button class="tool" id="x-rules" aria-label="Règles du jeu"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.6 2.3c-.8.4-1.2 1-1.2 1.9M12 16.8v.2"/></svg></button></div>
+      <div class="gstats"><span id="x-stat1"></span><span id="x-stat2">0:00</span></div>
+    </header>
+    <div class="mini" id="mini-root"></div>
+  </section>
+
+  <!-- Sac de papa -->
+  <section id="s-dex" class="screen">
+    <header class="bar">
+      <button class="icon" data-back aria-label="Retour"><svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg></button>
+      <h2>Sac de papa</h2>
+      <span class="bar-stars" id="dex-count"></span>
+    </header>
+    <div class="dex-bar"><div class="dex-tiers" id="dex-tiers"></div></div>
+    <div class="dex-grid" id="dex-grid"></div>
+  </section>
+
+  <!-- Carte agrandie du Sac de papa -->
+  <div class="modal zoom" id="m-card" role="dialog" aria-modal="true" aria-label="Carte agrandie">
+    <div class="zoom-wrap" id="zoom-card"></div>
+    <p class="zoom-hint">Touche n’importe où pour fermer</p>
+  </div>
+
+  <!-- Fenêtres -->
+  <div class="modal" id="m-rules" role="dialog" aria-modal="true" aria-labelledby="rules-title">
+    <div class="sheet">
+      <h3 id="rules-title">Règles</h3>
+      <p class="rules-text" id="rules-text"></p>
+      <button class="btn primary" id="rules-ok">C’est parti</button>
+    </div>
+  </div>
+  <div class="modal" id="m-lose" role="dialog" aria-modal="true" aria-labelledby="lose-title">
+    <div class="sheet">
+      <h3 id="lose-title">Perdu</h3>
+      <p class="rules-text" id="lose-text"></p>
+      <button class="btn primary" id="lose-retry">Réessayer</button>
+      <button class="btn ghost" id="lose-quit">Tous les niveaux</button>
+    </div>
+  </div>
+  <div class="modal" id="m-pause" role="dialog" aria-modal="true" aria-labelledby="pause-title">
+    <div class="sheet">
+      <h3 id="pause-title">Pause</h3>
+      <button class="btn primary" id="p-resume">Reprendre</button>
+      <button class="btn" id="p-restart">Recommencer le niveau</button>
+      <button class="btn ghost" id="p-quit">Quitter le niveau</button>
+    </div>
+  </div>
+  <div class="modal" id="m-done" role="dialog" aria-modal="true" aria-labelledby="done-title">
+    <div class="confetti" id="d-confetti" aria-hidden="true"></div>
+    <div class="sheet win">
+      <div class="dance">
+        <div class="dance-shadow"></div>
+        <img class="poup" id="d-poup" src="img/papa.png" alt="Papa qui danse">
+      </div>
+      <div class="win-body">
+      <h3 id="done-title">Bravo Papa, tu as trouvé tous les objets&#8239;!</h3>
+      <p class="done-sub" id="d-sub"></p>
+      <div class="stars" id="d-stars"></div>
+      <dl class="stats" id="d-stats"></dl>
+      <div class="reward" id="d-reward"></div>
+      <div class="sheet-row">
+        <button class="btn" id="d-replay">Rejouer</button>
+        <button class="btn primary" id="d-next">Manche suivante</button>
+      </div>
+      <button class="btn ghost" id="d-levels">Tous les niveaux</button>
+      </div>
+    </div>
+  </div>
+  <!-- Cartes Super Shiny (niveaux 25, 50 et 75) -->
+  <div hidden id="super-imgs"><img data-k="0" src="img/super1.webp" alt=""><img data-k="1" src="img/super2.webp" alt=""><img data-k="2" src="img/super3.webp" alt=""></div>
+
+  <!-- Révélation de l’objet gagné -->
+  <div class="reveal" id="reveal" role="dialog" aria-modal="true" aria-labelledby="rv-title">
+    <div class="rv-rays" aria-hidden="true"></div>
+    <div class="rv-rays rv-rays2" aria-hidden="true"></div>
+    <div class="rv-ring" aria-hidden="true"></div>
+    <div class="rv-ring rv-ring2" aria-hidden="true"></div>
+    <div class="rv-rain" id="rv-rain" aria-hidden="true"></div>
+    <div class="rv-sparks" id="rv-sparks" aria-hidden="true"></div>
+    <div class="rv-flash" aria-hidden="true"></div>
+    <p class="rv-title" id="rv-title">Nouvel objet !</p>
+    <div class="rv-stage">
+      <div class="rv-egg" aria-hidden="true"><span>?</span></div>
+      <div class="rv-fig" id="rv-fig" aria-hidden="true"><div class="rv-fig-bob"><div class="rv-fig-in"></div></div><div class="rv-fig-shadow"></div></div>
+      <div class="rv-card" id="rv-card"></div>
+    </div>
+    <p class="rv-tier" id="rv-tier"></p>
+    <button class="btn primary rv-ok" id="rv-ok">Ranger dans le Sac de papa</button>
+  </div>
+
+  <!-- Publicités de la maison (toutes les 3 manches) -->
+  <div class="ad" id="ad" role="dialog" aria-modal="true" aria-labelledby="ad-product">
+    <div class="ad-rays" aria-hidden="true"></div>
+    <span class="ad-tag">Publicité</span>
+    <div class="ad-close">
+      <span class="ad-count" id="ad-count" aria-live="polite">3</span>
+      <button class="ad-x" id="ad-x" aria-label="Fermer la publicité"><svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+    </div>
+    <div class="ad-stage">
+      <figure class="ad-photo">
+        <img data-animal="chat" src="img/chat.webp" alt="Le chat qui fait du yoga">
+        <img data-animal="chat2" src="img/chat2.webp" alt="Le chat boxeur">
+        <img data-animal="chat3" src="img/chat3.webp" alt="Le chat en gros plan">
+        <img data-animal="transat" src="img/transat.webp" alt="La pause sur le grand transat">
+        <img data-animal="chien" src="img/chien.webp" alt="Le chien sur son fauteuil">
+        <img data-animal="poncho" src="img/poncho.webp" alt="Le poncho de l’attraction">
+        <img data-animal="atelier" src="img/atelier.webp" alt="Le selfie à l’atelier">
+        <figcaption class="ad-bubble" id="ad-bubble"></figcaption>
+      </figure>
+      <div class="ad-copy">
+        <p class="ad-brand" id="ad-brand"></p>
+        <h2 class="ad-product" id="ad-product"></h2>
+        <p class="ad-slogan" id="ad-slogan"></p>
+        <div class="ad-row">
+          <span class="ad-visual" id="ad-visual" aria-hidden="true"></span>
+          <span class="ad-price" id="ad-price"></span>
+        </div>
+        <p class="ad-small" id="ad-small"></p>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script src="js/objects.js"></script>
+<script src="js/scenes.js"></script>
+<script src="js/scenes-plus.js"></script>
+<script src="js/geek.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/game.js"></script>
+<script src="js/minis.js"></script>
+<script src="js/minis2.js"></script>
+<script src="js/linkedin.js"></script>
+<script src="js/extras.js"></script>
+</body>
+</html>

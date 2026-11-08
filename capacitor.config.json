@@ -1,0 +1,10 @@
+{
+  "appId": "com.jeuxdepapa.jeu",
+  "appName": "Jeux de Papa",
+  "webDir": "www",
+  "backgroundColor": "#0b1218",
+  "android": {
+    "backgroundColor": "#0b1218",
+    "adjustMarginsForEdgeToEdge": "disable"
+  }
+}
