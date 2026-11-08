@@ -1,0 +1,57 @@
+name: Construire l'APK
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Récupérer le code
+        uses: actions/checkout@v4
+
+      - name: Installer Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Installer Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Installer les dépendances
+        run: npm install
+
+      - name: Créer le projet Android
+        run: npx cap add android
+
+      - name: Générer l'icône et l'écran de démarrage
+        run: npx capacitor-assets generate --android --iconBackgroundColor '#1565c0' --iconBackgroundColorDark '#1565c0' --splashBackgroundColor '#0b1218' --splashBackgroundColorDark '#0b1218' || echo "Icône par défaut conservée"
+
+      - name: Mode paysage (tablette couchée)
+        run: sed -i 's/<activity/<activity android:screenOrientation="sensorLandscape"/' android/app/src/main/AndroidManifest.xml
+
+      - name: Plein écran sans barres blanches
+        run: cp android-overrides/MainActivity.java android/app/src/main/java/com/jeuxdepapa/jeu/MainActivity.java
+
+      - name: Copier le jeu dans le projet Android
+        run: npx cap sync android
+
+      - name: Compiler l'APK
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleDebug --no-daemon
+
+      - name: Renommer l'APK
+        run: cp android/app/build/outputs/apk/debug/app-debug.apk Jeux-de-Papa.apk
+
+      - name: Mettre l'APK à disposition
+        uses: actions/upload-artifact@v4
+        with:
+          name: Jeux-de-Papa-apk
+          path: Jeux-de-Papa.apk
